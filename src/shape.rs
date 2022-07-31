@@ -55,6 +55,14 @@ impl Shape {
             _ => unreachable!()
         }
     }
+
+    pub fn positions(&self) -> impl Iterator<Item = Pos> + '_ {
+        self.positions.iter().copied()
+    }
+
+    pub fn collides_with(&self, other: &Shape) -> bool {
+        self.positions.intersection(&other.positions).count() > 0
+    }
 }
 
 impl Add<Pos> for &Shape {

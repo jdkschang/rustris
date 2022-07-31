@@ -17,7 +17,30 @@ impl Tetris {
             fixed_shapes: vec![],
         }
     }
-    pub fn tick(&mut self) {}
+
+    pub fn is_out_of_bounds(&self, shape: &Shape) -> bool {
+        shape.positions().all(|pos| pos.0 >= 0 && pos.0 < self.width && pos.1 >= 0 && pos.1 < self.height)
+    }
+
+    pub fn is_colliding(&self, shape: &Shape) -> bool {
+        self.fixed_shapes.iter().any(|fixed_shape| fixed_shape.collides_with(shape))
+    }
+
+    pub fn tick(&mut self) {
+        let translated_current_shape = &self.current_shape + Pos(0, 1);
+
+        if self.is_out_of_bounds(&translated_current_shape) || self.is_colliding(&translated_current_shape) {
+            // Make current shape to fixed
+            let new_fixed_shape = mem::replace(
+                &mut self.current_shape,
+                &Shape::new_random() + Pos(self.width / 2, 0),
+            );
+
+            self.fixed_shapes.push(new_fixed_shape);
+        } else {
+            self.current_shape = translated_current_shape;
+        }
+    }
 }
 
 #[cfg(test)]
@@ -26,6 +49,11 @@ mod tests {
 
     #[test]
     fn test() {
-        println!("{:#?}", Tetris::new(10, 30));
+        let mut tetris = Tetris::new(10, 30);
+        tetris.tick();
+        tetris.tick();
+        tetris.tick();
+
+        println!("{:#?}", tetris);
     }
 }
