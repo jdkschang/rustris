@@ -9,6 +9,17 @@ pub struct Shape {
     anchor: Pos,
 }
 
+macro_rules! impl_shape_constructor {
+    ($new:ident: [$( $pos:expr ),* ] anchored at $anchor:expr) => {
+        pub fn new_i() -> Self {
+            Self {
+                positions: [$( $pos ),*].into_iter().collect(),
+                anchor: $anchor,
+            }
+        }
+    }
+}
+
 impl Shape {
     pub fn new_i() -> Self {
         Self {
