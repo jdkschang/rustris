@@ -32,4 +32,19 @@ impl Shape {
         new_s: [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(-1, 1)] anchored at Pos(0, 0);
         new_z: [Pos(0, 0), Pos(-1, 0), Pos(0, 1), Pos(1, 1)] anchored at Pos(0, 0);
     }
+
+    pub fn new_random() -> Self {
+        let random = (rand::random::<f64>() * 7.0).floor() as u8;
+
+        match random {
+            0 => Self::new_i(),
+            1 => Self::new_o(),
+            2 => Self::new_t(),
+            3 => Self::new_j(),
+            4 => Self::new_l(),
+            5 => Self::new_s(),
+            6 => Self::new_z(),
+            _ => unreachable!()
+        }
+    }
 }
