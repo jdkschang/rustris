@@ -18,7 +18,7 @@ pub struct Shape {
 }
 
 macro_rules! impl_shape_constructor {
-    ($( $new:ident: [$( $pos:expr ),* ] anchored at $anchor:expr; )*) => {
+    ($( $new:ident: [ $( $pos:expr ),* ] anchored at $anchor:expr; )*) => {
         $(
             pub fn $new() -> Self {
                 Self {
@@ -63,7 +63,7 @@ impl Add<Pos> for &Shape {
     fn add(self, rhs: Pos) -> Self::Output {
         Shape {
             positions: self.positions.iter().map(|&pos| pos + rhs).collect(),
-            anchor: self.anchor + rhs
+            anchor: self.anchor + rhs,
         }
     }
 }
