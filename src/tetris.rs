@@ -1,6 +1,5 @@
-use std::mem;
-use std::collections::HashSet;
 use crate::shape::{Pos, Shape};
+use std::{mem, collections::HashSet};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
