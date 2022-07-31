@@ -80,7 +80,7 @@ impl Tetris {
             // Make current shape to fixed
             let new_fixed_shape = mem::replace(
                 &mut self.current_shape,
-                &Shape::new_random() + Pos(self.width / 2, 0),
+                &Shape::new_random() + Pos((self.width - 1)/ 2, 0),
             );
 
             self.fixed_shapes.push(new_fixed_shape);

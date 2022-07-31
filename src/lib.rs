@@ -79,7 +79,10 @@ impl Component for App {
             ..tetris.value().iter_positions().map(|pos| {
                 let typ = tetris.value().get(pos);
 
-                h!(div).build(c![typ.unwrap_or_default()])
+                h!(div)
+                    .style(
+                  &Style::new().text_indent("-.2em").margin_top("-.2em")
+                ).build(c![typ.unwrap_or_default()])
             })
         ])
     }
