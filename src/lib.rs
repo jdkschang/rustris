@@ -1,12 +1,13 @@
-use js_sys::Reflect;
 use tetris::{Direction, Tetris};
-use wasm_bindgen::JsValue;
+use js_sys::{Function, Reflect};
+use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use wasm_react::{
     c, export_components, h,
-    hooks::use_state,
+    hooks::{use_state, use_effect, Deps},
     props::Style,
     Component,
 };
+use web_sys::window;
 
 mod shape;
 mod tetris;
@@ -30,6 +31,40 @@ impl TryFrom<JsValue> for App {
 impl Component for App {
     fn render(&self) -> wasm_react::VNode {
         let tetris = use_state(|| Tetris::new(self.width, self.height));
+
+
+        use_effect(
+            {
+                let tetris = tetris.clone();
+
+                move || {
+                    let tick_closure = Closure::new({
+                        let mut tetris = tetris.clone();
+                        move || {
+                            tetris.set(|mut tetris| {
+                                tetris.tick();
+                                tetris
+                            })
+                        }
+                    });
+
+                    let handle = window()
+                        .unwrap_throw()
+                        .set_interval_with_callback_and_timeout_and_arguments_0(
+                            tick_closure.as_ref().dyn_ref::<Function>().unwrap_throw(),
+                            500)
+                        .unwrap_throw();
+
+                    // destructor
+                    move || {
+                        drop(tick_closure);
+                        window()
+                            .unwrap_throw()
+                            .clear_interval_with_handle(handle)
+                    }
+                }
+            }, Deps::none(),
+        );
 
         h!(div)
             .style(
