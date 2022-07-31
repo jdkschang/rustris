@@ -21,17 +21,7 @@ macro_rules! impl_shape_constructor {
 }
 
 impl Shape {
-    pub fn new_i() -> Self {
-        Self {
-            positions: [
-                Pos(0, 0),
-                Pos(1, 0),
-                Pos(2, 0),
-                Pos(3, 0),
-            ]
-                .into_iter()
-                .collect(),
-            anchor: Pos(1, 0)
-        }
+    impl_shape_constructor! {
+        new_i: [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(3, 0)] anchored at Pos(1, 0)
     }
 }
