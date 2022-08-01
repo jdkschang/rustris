@@ -17,6 +17,7 @@ pub struct Tetris {
 }
 
 impl Tetris {
+    #[allow(clippy::pedantic)]
     pub fn new(width: u32, height: u32) -> Self {
         Self {
             width: width as i32,
@@ -38,7 +39,10 @@ impl Tetris {
         if self.current_shape.has_position(pos) {
             Some(self.current_shape.typ())
         } else {
-            self.fixed_shapes.iter().find(|shape| shape.has_position(pos)).map(|shape| shape.typ())
+            self.fixed_shapes
+                .iter()
+                .find(|shape| shape.has_position(pos))
+                .map(Shape::typ)
         }
     }
 
@@ -50,16 +54,17 @@ impl Tetris {
         self.fixed_shapes.iter().any(|fixed_shape| fixed_shape.collides_with(shape))
     }
 
+    #[allow(clippy::pedantic)]
     pub fn is_line_full(&self, y: i32) -> bool {
         self.fixed_shapes.iter()
-            .flat_map(|shape| shape.iter_positions())
+            .flat_map(Shape::iter_positions)
             .filter(|pos| pos.1 == y)
             .collect::<HashSet<_>>()
             .len() as i32 == self.width
     }
 
     fn remove_line(&mut self, y: i32) {
-        for shape in self.fixed_shapes.iter_mut() {
+        for shape in &mut self.fixed_shapes {
             shape.remove_line(y);
         }
     }
@@ -67,7 +72,7 @@ impl Tetris {
     fn remove_full_lines(&mut self) {
         for y in 0..self.height {
             if self.is_line_full(y) {
-                self.remove_line(y)
+                self.remove_line(y);
             }
         }
     }

@@ -20,8 +20,9 @@ pub struct App {
 impl TryFrom<JsValue> for App {
     type Error = JsValue;
 
+    #[allow(clippy::pedantic)]
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
-        Ok(App {
+        Ok(Self {
             width: Reflect::get(&value, &"width".into())?.as_f64().unwrap_or(10.0) as u32,
             height: Reflect::get(&value, &"height".into())?.as_f64().unwrap_or(30.0) as u32,
         })
@@ -57,7 +58,7 @@ impl Component for App {
                         tetris.set(|mut tetris| {
                             tetris.tick();
                             tetris
-                        })
+                        });
                     }
                 });
 
@@ -73,7 +74,7 @@ impl Component for App {
                     drop(tick_closure);
                     window()
                         .unwrap_throw()
-                        .clear_interval_with_handle(handle)
+                        .clear_interval_with_handle(handle);
                 }
             }
         }, Deps::some(*speed.value()));
@@ -102,14 +103,14 @@ impl Component for App {
                     tetris.set(|mut tetris| {
                         tetris.rotate();
                         tetris
-                    })
+                    });
                 } else if code == "ArrowDown" {
-                    speed.set(|_| 50)
+                    speed.set(|_| 50);
                 }
         }}, Deps::none());
 
         let handle_key_up = use_callback({
-            let mut speed = speed.clone();
+            let mut speed = speed;
 
             move |evt: KeyboardEvent| {
                 if evt.code() == "ArrowDown" {
@@ -123,23 +124,21 @@ impl Component for App {
             .tabindex(0)
             .on_keydown(&handle_key_down)
             .on_keyup(&handle_key_up)
-            .style(
-                &Style::new()
-                    .display("inline-grid")
-                    .grid_template(format!(
-                        "repeat({}, 1em) / repeat({}, 1em)",
-                        self.height, self.width))
-                    .border("1px solid grey")
-                    .outline("none")
+            .style(&Style::new()
+                .display("inline-grid")
+                .grid_template(format!(
+                    "repeat({}, 1em) / repeat({}, 1em)",
+                    self.height, self.width))
+                .border("1px solid grey")
+                .outline("none")
             )
             .build(c![
             ..tetris.value().iter_positions().map(|pos| {
                 let typ = tetris.value().get(pos);
 
                 h!(div)
-                    .style(
-                  &Style::new().text_indent("-.2em").margin_top("-.2em")
-                ).build(c![typ.unwrap_or_default()])
+                    .style(&Style::new().text_indent("-.2em").margin_top("-.2em"))
+                    .build(c![typ.unwrap_or_default()])
             })
         ])
     }

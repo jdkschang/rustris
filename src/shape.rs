@@ -4,10 +4,10 @@ use std::{collections::HashSet, ops::Add};
 pub struct Pos(pub i32, pub i32);
 
 impl Add for Pos {
-    type Output = Pos;
+    type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Pos(self.0 + rhs.0, self.1 + rhs.1)
+        Self(self.0 + rhs.0, self.1 + rhs.1)
     }
 }
 
@@ -34,15 +34,16 @@ macro_rules! impl_shape_constructor {
 
 impl Shape {
     impl_shape_constructor! {
-        new_i "🟦": [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(3, 0)] @ Pos(1, 0);
-        new_o "🟨": [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(1, 1)] @ Pos(0, 0);
-        new_t "🟫": [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(1, 1)] @ Pos(1, 0);
+        new_i "🟦": [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(3, 0)]  @ Pos(1, 0);
+        new_o "🟨": [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(1, 1)]  @ Pos(0, 0);
+        new_t "🟫": [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(1, 1)]  @ Pos(1, 0);
         new_j "🟪": [Pos(0, 0), Pos(0, 1), Pos(0, 2), Pos(-1, 2)] @ Pos(0, 1);
-        new_l "🟧": [Pos(0, 0), Pos(0, 1), Pos(0, 2), Pos(1, 2)] @ Pos(0, 1);
+        new_l "🟧": [Pos(0, 0), Pos(0, 1), Pos(0, 2), Pos(1, 2)]  @ Pos(0, 1);
         new_s "🟩": [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(-1, 1)] @ Pos(0, 0);
         new_z "🟥": [Pos(0, 0), Pos(-1, 0), Pos(0, 1), Pos(1, 1)] @ Pos(0, 0);
     }
 
+    #[allow(clippy::pedantic)]
     pub fn new_random() -> Self {
         let random = (rand::random::<f64>() * 7.0).floor() as u8;
 
@@ -58,7 +59,7 @@ impl Shape {
         }
     }
 
-    pub fn typ(&self) -> &'static str {
+    pub const fn typ(&self) -> &'static str {
         self.typ
     }
 
@@ -70,7 +71,7 @@ impl Shape {
         self.positions.contains(&pos)
     }
 
-    pub fn collides_with(&self, other: &Shape) -> bool {
+    pub fn collides_with(&self, other: &Self) -> bool {
         self.positions.intersection(&other.positions).count() > 0
     }
 
@@ -79,20 +80,26 @@ impl Shape {
 
         Self {
             typ: self.typ,
-            positions: self.iter_positions()
-                           .map(|Pos(x, y)| Pos(-y + a + b, x - a + b))
-                           .collect(),
+            positions: self
+                .iter_positions()
+                .map(|Pos(x, y)| Pos(-y + a + b, x - a + b))
+                .collect(),
             anchor: self.anchor,
         }
     }
 
     pub fn remove_line(&mut self, y: i32) {
-        self.positions = self.iter_positions()
-                             .filter(|pos| pos.1 != y)
-            .map(|pos| if pos.1 >= y { pos } else {
-                Pos(pos.0, pos.1 + 1)
+        self.positions = self
+            .iter_positions()
+            .filter(|pos| pos.1 != y)
+            .map(|pos| {
+                if pos.1 >= y {
+                    pos
+                } else {
+                    Pos(pos.0, pos.1 + 1)
+                }
             })
-                             .collect();
+            .collect();
     }
 }
 
