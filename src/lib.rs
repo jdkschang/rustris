@@ -3,11 +3,11 @@ use js_sys::{Function, Reflect};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use wasm_react::{
     c, export_components, h,
-    hooks::{use_callback, use_state, use_effect, Deps},
+    hooks::{use_callback, use_js_ref, use_state, use_effect, Deps},
     props::Style,
     Component,
 };
-use web_sys::{KeyboardEvent, window};
+use web_sys::{window, Element, HtmlElement, KeyboardEvent};
 
 mod shape;
 mod tetris;
@@ -32,6 +32,19 @@ impl Component for App {
     fn render(&self) -> wasm_react::VNode {
         let tetris = use_state(|| Tetris::new(self.width, self.height));
         let speed = use_state(|| 500);
+        let element_container = use_js_ref::<Element>(None);
+
+        use_effect({
+            // auto-focus container
+            let element_container = element_container.clone();
+            move || {
+                element_container
+                    .current()
+                    .and_then(|element| element.dyn_into::<HtmlElement>().ok())
+                    .map(|element| element.focus().ok());
+
+                    || ()
+        }}, Deps::none());
 
         use_effect({
             let tetris = tetris.clone();
@@ -91,7 +104,7 @@ impl Component for App {
                         tetris
                     })
                 } else if code == "ArrowDown" {
-                    speed.set(|_| 100)
+                    speed.set(|_| 50)
                 }
         }}, Deps::none());
 
@@ -106,6 +119,7 @@ impl Component for App {
         }, Deps::none());
 
         h!(div)
+            .ref_container(&element_container)
             .tabindex(0)
             .on_keydown(&handle_key_down)
             .on_keyup(&handle_key_up)
