@@ -31,9 +31,11 @@ impl TryFrom<JsValue> for App {
 impl Component for App {
     fn render(&self) -> wasm_react::VNode {
         let tetris = use_state(|| Tetris::new(self.width, self.height));
+        let speed = use_state(|| 500);
 
         use_effect({
             let tetris = tetris.clone();
+            let speed = *speed.value();
 
             move || {
                 let tick_closure = Closure::new({
@@ -50,7 +52,7 @@ impl Component for App {
                     .unwrap_throw()
                     .set_interval_with_callback_and_timeout_and_arguments_0(
                         tick_closure.as_ref().dyn_ref::<Function>().unwrap_throw(),
-                        500)
+                        speed)
                     .unwrap_throw();
 
                 // destructor
@@ -61,10 +63,11 @@ impl Component for App {
                         .clear_interval_with_handle(handle)
                 }
             }
-        }, Deps::none());
+        }, Deps::some(*speed.value()));
 
         let handle_key_down = use_callback({
             let mut tetris = tetris.clone();
+            let mut speed = speed.clone();
 
             move |evt: KeyboardEvent| {
                 let code = evt.code();
@@ -87,12 +90,25 @@ impl Component for App {
                         tetris.rotate();
                         tetris
                     })
+                } else if code == "ArrowDown" {
+                    speed.set(|_| 100)
                 }
         }}, Deps::none());
+
+        let handle_key_up = use_callback({
+            let mut speed = speed.clone();
+
+            move |evt: KeyboardEvent| {
+                if evt.code() == "ArrowDown" {
+                    speed.set(|_| 500);
+                }
+            }
+        }, Deps::none());
 
         h!(div)
             .tabindex(0)
             .on_keydown(&handle_key_down)
+            .on_keyup(&handle_key_up)
             .style(
                 &Style::new()
                     .display("inline-grid")
