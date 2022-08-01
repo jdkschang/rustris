@@ -94,7 +94,7 @@ impl Tetris {
         }
     }
 
-    pub fn shift_current_shape(&mut self, direction: Direction) {
+    pub fn shift(&mut self, direction: Direction) {
         if self.game_over { return; }
         let translated_current_shape = &self.current_shape + match direction {
             Direction::Left => Pos(-1, 0),
